@@ -18,14 +18,10 @@ fn main() {
         cmake.define("CXX_JUCE_SYSTEM_JUCE_SOURCE", juce_path);
     }
 
+    let enable_jack = env::var("CXX_JUCE_ENABLE_JACK").map(|val| val == "1" || val.to_lowercase() == "true" || val.to_lowercase() == "on").unwrap_or_default();
+
     // Handle JACK support based on environment variable
-    if let Ok(enable_jack) = env::var("CXX_JUCE_ENABLE_JACK") {
-        if enable_jack == "1" || enable_jack.to_lowercase() == "true" || enable_jack.to_lowercase() == "on" {
-            cmake.define("CXX_JUCE_ENABLE_JACK", "ON");
-        } else {
-            cmake.define("CXX_JUCE_ENABLE_JACK", "OFF");
-        }
-    }
+    cmake.define("CXX_JUCE_ENABLE_JACK", if enable_jack { "ON" } else { "OFF" });
 
     if cfg!(feature = "asio") {
         cmake.define("CXX_JUCE_USE_ASIO", "ON");
@@ -88,6 +84,10 @@ fn main() {
 
     if cfg!(target_os = "linux") {
         println!("cargo:rustc-link-lib=asound");
-        println!("cargo:rustc-link-lib=jack");
+
+        // Only link jack if explicitly enabled
+        if enable_jack {
+            println!("cargo:rustc-link-lib=jack");
+        }
     }
 }
