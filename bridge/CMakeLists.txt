@@ -10,6 +10,9 @@ set(CXX_JUCE_VERSION_OF_JUCE 7.0.12)
 # Add option to use system-provided JUCE source
 set(CXX_JUCE_SYSTEM_JUCE_SOURCE "" CACHE PATH "Path to pre-fetched JUCE source directory")
 
+# Add option to enable JACK support (disabled by default)
+set(CXX_JUCE_ENABLE_JACK OFF CACHE BOOL "Enable JACK audio support")
+
 set(JUCE_MODULES_ONLY ON)
 
 # First try to find installed JUCE
@@ -50,6 +53,16 @@ target_compile_definitions(cxx-juce
     PUBLIC
         JUCE_USE_CURL=0
 )
+
+if (NOT CXX_JUCE_ENABLE_JACK)
+    message(STATUS "JACK audio support disabled")
+    target_compile_definitions(cxx-juce
+        PUBLIC
+            JUCE_JACK=0
+    )
+else()
+    message(STATUS "JACK audio support enabled")
+endif()
 
 message(STATUS "Using bindings at ${CXX_JUCE_BINDINGS_DIR}")
 

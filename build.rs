@@ -18,6 +18,15 @@ fn main() {
         cmake.define("CXX_JUCE_SYSTEM_JUCE_SOURCE", juce_path);
     }
 
+    // Handle JACK support based on environment variable
+    if let Ok(enable_jack) = env::var("CXX_JUCE_ENABLE_JACK") {
+        if enable_jack == "1" || enable_jack.to_lowercase() == "true" || enable_jack.to_lowercase() == "on" {
+            cmake.define("CXX_JUCE_ENABLE_JACK", "ON");
+        } else {
+            cmake.define("CXX_JUCE_ENABLE_JACK", "OFF");
+        }
+    }
+
     if cfg!(feature = "asio") {
         cmake.define("CXX_JUCE_USE_ASIO", "ON");
 
@@ -44,6 +53,7 @@ fn main() {
     println!("cargo:rerun-if-changed=bridge");
     println!("cargo:rerun-if-env-changed=CXX_JUCE_ASIO_SDK_DIR");
     println!("cargo:rerun-if-env-changed=CXX_JUCE_SYSTEM_JUCE_SOURCE");
+    println!("cargo:rerun-if-env-changed=CXX_JUCE_ENABLE_JACK");
 
     if cfg!(target_os = "windows") {
         println!(
